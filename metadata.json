@@ -1,0 +1,6 @@
+{
+  "name": "BRX Background Remover",
+  "description": "Client-side video background remover and transparent PNG frame sequence extractor with local person segmentation.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
