@@ -9,6 +9,7 @@ import {
   type DragEvent,
 } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import FrameArchivePanel from "@/components/FrameArchivePanel";
 import FramePngExportPanel from "@/components/FramePngExportPanel";
 import FramePreviewPanel from "@/components/FramePreviewPanel";
@@ -85,8 +86,8 @@ export default function Home() {
   const [segmentationMaskDimensions, setSegmentationMaskDimensions] = useState<{ width: number; height: number } | null>(null);
   const [processedFrameCount, setProcessedFrameCount] = useState(0);
   const [timelineProgress, setTimelineProgress] = useState(0);
- const [canProcess720p, setCanProcess720p] = useState(false);
-const [canProcess1080p, setCanProcess1080p] = useState(false);
+  const [canProcess720p, setCanProcess720p] = useState(false);
+  const [canProcess1080p, setCanProcess1080p] = useState(false);
   const [processingResolution, setProcessingResolution] = useState<ProcessingResolution>("480p");
   const [savedFrameCount, setSavedFrameCount] = useState(0);
   const [archiveBytes, setArchiveBytes] = useState(0);
@@ -729,23 +730,17 @@ const [canProcess1080p, setCanProcess1080p] = useState(false);
           controller.signal,
         );
         if (controller.signal.aborted) break;
-        if (!wasSaved) {
-          stoppedAtBudget = true;
-          break;
+        if (!wasSaved && !controller.signal.aborted) {
+          setArchiveWarning(
+            "ZIP limit reached. Video processing continued, but additional PNG frames were not saved to the ZIP.",
+          );
         }
       }
 
       if (controller.signal.aborted) return;
       if (frameCount === 0) {
         throw new Error("The browser reached the end without presenting a decodable video frame.");
-      }
-
-      if (stoppedAtBudget) {
-        setProcessingStatus("error");
-        setModelMessage("");
-        setMessage(archiveWarning || "Archive memory limit reached; processing stopped before another frame was discarded.");
-        return;
-      }
+      } 
 
       setTimelineProgress(100);
       setProcessingStatus("complete");
@@ -943,14 +938,29 @@ const [canProcess1080p, setCanProcess1080p] = useState(false);
     <main className="min-h-screen px-5 pb-16 pt-6 sm:px-8 sm:pt-8">
       <div className="mx-auto max-w-6xl">
         <header className="flex items-center justify-between border-b border-white/[0.08] pb-5">
-          <Link className="flex items-center gap-3" href="/" aria-label="BRX Background Remover home">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-accent/25 bg-accent/10 text-sm font-bold tracking-tight text-accent">
-              BRX
-            </span>
-            <span className="text-sm font-semibold tracking-wide text-white sm:text-base">
-              Background Remover
+          <Link
+            className="flex items-center gap-3"
+            href="/"
+            aria-label="BRX Background Remover home"
+          >
+            <img
+              src="/brand/brx-logo.png"
+              alt="BRX Panther Logo"
+              width={48}
+              height={48}
+              className="h-12 w-12 rounded-xl object-contain"
+            />
+
+            <span className="flex flex-col">
+              <span className="text-base font-bold tracking-wider text-white sm:text-lg">
+                BRX
+              </span>
+              <span className="text-xs font-medium tracking-wide text-slate-400 sm:text-sm">
+                Background Remover
+              </span>
             </span>
           </Link>
+
           <span className="hidden rounded-full border border-white/10 px-3 py-1.5 text-xs text-slate-400 sm:inline-flex">
             Frame-by-frame
           </span>
